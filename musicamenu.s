@@ -1,4 +1,4 @@
-#macro menum
+.macro menum
 li a7, 31
 li a0, 62
 li a1, 200
@@ -216,4 +216,4 @@ li a1, 1000
 li a2, 75
 li a3, 70
 ecall
-#.end_macro
+.end_macro
