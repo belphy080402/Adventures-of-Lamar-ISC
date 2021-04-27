@@ -17,7 +17,7 @@
 .text
 MAIN:
 
-# Até o momento só mostra as imagens em sequência.
-# Só vou colocar a música depois que estiver tudo
+# Ate o momento so mostra as imagens em sequencia.
+# So vou colocar a musica depois que estiver tudo
 # funcionando pra facilitar o teste.
 Menu
