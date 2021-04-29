@@ -9,7 +9,10 @@
 .include "macro.s"
 
 # personagem para teste
-.include "./Imagens/lamar.data"
+.include "./Imagens/lamaresq.data"
+.include "./Imagens/lamardir.data"
+.include "./Imagens/lamarbaixo.data"
+.include "./Imagens/lamarcima.data"
 
 # mapa para teste
 .include "./Imagens/MAPA1.data"
@@ -23,6 +26,7 @@
 .text
 
 Menu
+
 MAIN:
 
 Imprimepersonagem(0xFF008C22, NEXT)

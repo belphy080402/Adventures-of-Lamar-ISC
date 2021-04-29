@@ -99,7 +99,7 @@ IMPRIME:
 # Para isso vou fazer um macro separado so para imprimir o personagem.
 
 .macro Imprimepersonagem(%hex, %funçao)
-	la t0, lamar		#endereço de imagem
+	la t0, lamardir		#endereço de imagem
 	lw t1, 0(t0) 		#x(linhas)
 	lw t2, 4(t0) 		#y(colunas)
 	lw t6, 0(t0)            #armazena o n de linhas da imagem para incrementar em t1 sem ser alterado
@@ -144,15 +144,17 @@ RECEBE_TECLA:
 	andi t0,t0,0x0001		# mascara o bit menos significativo
    	beq t0,zero,RETORNA   	   	# Se não há tecla pressionada então vai para Retorno(funça {RETORNA: ret} deve estar no final da pagina do arquivo)
    	lw t2,4(t1)  			# le o valor da tecla
-	li t5, 115			# ascii de "w" para verificar se foi pressionado
-	li t6, 100			# ascii de "s" para verificar se foi pressionado
+   	li t3, 115			# ascii de "s"
+   	li t4, 119			# ascii de "w" para verificar se foi pressionado
+	li t5, 97			# ascii de "a" para verificar se foi pressionado
+	li t6, 100			# ascii de "d" para verificar se foi pressionado
 	li t0, 102			# ascii de "f" para verificar se foi pressionado
-	beq t2, t6, APAGA		# anda para a direita
-	beq t2, t5, RECEBE_TECLA
-	beq t2, t0, RECEBE_TECLA
-	
-	
-APAGA:
+	beq t2, t6, APAGADIR		# anda para a direita
+	beq t2, t5, APAGAESQ
+	beq t2, t4, APAGACIMA
+	beq t2, t3, APAGABAIXO
+
+APAGADIR:
 	la t0, meiochao		#endereço de imagem
 	lw t1, 0(t0) 		#x(linhas)
 	lw t2, 4(t0) 		#y(colunas)
@@ -162,30 +164,31 @@ APAGA:
 	li t4, 0		#contador
 	addi s9, s10, 0		#guarda em s9 o endereço em que deve começar a apagar
 
-APAGA_IMPRIME:
-	bge t4, t3, NOVOVAL		#quando finalizar, pula para a função desejada
+APAGA_IMPRIME_DIR:
+	bge t4, t3, NOVOVAL_DIR		#quando finalizar, pula para a função desejada
 	lb t5, 0(t0)
 	sb t5, 0(s9)
 	addi t0, t0, 1
 	addi s9, s9, 1	
 	addi t4, t4, 1
-	beq t4, t6, APAGA_PULA		#quando chegar ao final de uma linha, pula para a seguinte	
-	j 	APAGA_IMPRIME
+	beq t4, t6, APAGA_PULA_DIR		#quando chegar ao final de uma linha, pula para a seguinte	
+	j 	APAGA_IMPRIME_DIR
 	
-	APAGA_PULA:
+	APAGA_PULA_DIR:
 	addi t6, t6, 24			#incrementa o numero de pixels impressos em 24 para o próximo beq ainda pular linha.
 	addi s9, s9, 0x128		
-	j APAGA_IMPRIME
+	j APAGA_IMPRIME_DIR
 
-NOVOVAL:
+NOVOVAL_DIR:
 	li t5, 0x1300			#retira os valores que foram somados para imprimir na linha seguinte, voltando ao "canto superior esquerdo"
 	sub s9, s9, t5			#da imagem.
 	
+	li t3, 24
 	addi s10, s10, 8		# Passa o endereço incial que vai ser apagado 16 pixels para frente
 
 
-ANDA:
-	la t0, lamar		#endereço de imagem
+ANDA_DIR:
+	la t0, lamardir		#endereço de imagem
 	lw t1, 0(t0) 		#x(linhas)
 	lw t2, 4(t0) 		#y(colunas)
 	lw t6, 0(t0)            #armazena o n de linhas da imagem para incrementar em t1 sem ser alterado
@@ -199,22 +202,221 @@ ANDA:
 	
 	
 #Já com a imagem carregada, ocorre impressao nesse loop	
-IMPRIME:
+IMPRIME_DIR:
 	beq t4, t3, INC			#quando finalizar, pula para a função desejada
 	lb t5, 0(t0)
 	sb t5, 0(s0)
 	addi t0, t0, 1
 	addi s0, s0, 1	
 	addi t4, t4, 1
-	beq t4, t6, PULA		#quando chegar ao final de uma linha, pula para a seguinte	
-	j 	IMPRIME
+	beq t4, t6, PULA_DIR		#quando chegar ao final de uma linha, pula para a seguinte	
+	j 	IMPRIME_DIR
 	
-	PULA:
+	PULA_DIR:
 	add t6, t6, t1			#incrementa o numero de pixels impressos em 16 para o próximo beq ainda pular linha.
 	addi s0, s0, 0x130
-	j IMPRIME
+	j IMPRIME_DIR
+	
+	
+##################################################################
+##################################################################
 
-RETORNA: ret
+APAGAESQ:
+	la t0, meiochao		#endereço de imagem
+	lw t1, 0(t0) 		#x(linhas)
+	lw t2, 4(t0) 		#y(colunas)
+	lw t6, 0(t0)            #armazena o n de linhas da imagem para incrementar em t1 sem ser alterado
+	mul t3, t1, t2		#numero total de pixels
+	addi t0, t0, 8		#Primeiro pixel
+	li t4, 0		#contador
+	addi s9, s10, 0		#guarda em s9 o endereço em que deve começar a apagar
+
+APAGA_IMPRIME_ESQ:
+	bge t4, t3, NOVOVAL_ESQ		#quando finalizar, pula para a função desejada
+	lb t5, 0(t0)
+	sb t5, 0(s9)
+	addi t0, t0, 1
+	addi s9, s9, 1	
+	addi t4, t4, 1
+	beq t4, t6, APAGA_PULA_ESQ		#quando chegar ao final de uma linha, pula para a seguinte	
+	j 	APAGA_IMPRIME_ESQ
+	
+	APAGA_PULA_ESQ:
+	addi t6, t6, 24			#incrementa o numero de pixels impressos em 24 para o próximo beq ainda pular linha.
+	addi s9, s9, 0x128		
+	j APAGA_IMPRIME_ESQ
+
+NOVOVAL_ESQ:
+	li t5, 0x1300			#retira os valores que foram somados para imprimir na linha seguinte, voltando ao "canto superior esquerdo"
+	sub s9, s9, t5			#da imagem.
+	
+	addi s9, s9, -24
+	addi s10, s10, -8		# Passa o endereço incial que vai ser apagado 8 pixels para frente
+
+
+ANDA_ESQ:
+	la t0, lamaresq		#endereço de imagem
+	lw t1, 0(t0) 		#x(linhas)
+	lw t2, 4(t0) 		#y(colunas)
+	lw t6, 0(t0)            #armazena o n de linhas da imagem para incrementar em t1 sem ser alterado
+	mul t3, t1, t2		#numero total de pixels
+	addi t0, t0, 8		#Primeiro pixel
+	li t4, 0		#contador
+	li s0, 0  		#endereço inicial de print/frame da proxima posicao do personagem
+	add s9, s10, zero	#armazena em s9 o endereço em que o personagem deve ser impresso
+	add s0, s0, s9		#passa o endereço para s0, de forma a não manipular diretamente no s9
+	addi s0, s0, 8		#soma 8 pixels no endereco inicial, que e a quantidade que o personagem anda
+	
+	
+#Já com a imagem carregada, ocorre impressao nesse loop	
+IMPRIME_ESQ:
+	beq t4, t3, INC			#quando finalizar, pula para a função desejada
+	lb t5, 0(t0)
+	sb t5, 0(s0)
+	addi t0, t0, 1
+	addi s0, s0, 1	
+	addi t4, t4, 1
+	beq t4, t6, PULA_ESQ		#quando chegar ao final de uma linha, pula para a seguinte	
+	j 	IMPRIME_ESQ
+	
+	PULA_ESQ:
+	add t6, t6, t1			#incrementa o numero de pixels impressos em 16 para o próximo beq ainda pular linha.
+	addi s0, s0, 0x130
+	j IMPRIME_ESQ	
+	
+#########################################################################		
+#########################################################################
+
+	APAGACIMA:
+	la t0, meiochao		#endereço de imagem
+	lw t1, 0(t0) 		#x(linhas)
+	lw t2, 4(t0) 		#y(colunas)
+	lw t6, 0(t0)            #armazena o n de linhas da imagem para incrementar em t1 sem ser alterado
+	mul t3, t1, t2		#numero total de pixels
+	addi t0, t0, 8		#Primeiro pixel
+	li t4, 0		#contador
+	addi s9, s10, 0		#guarda em s9 o endereço em que deve começar a apagar
+
+APAGA_IMPRIME_CIMA:
+	bge t4, t3, NOVOVAL_CIMA		#quando finalizar, pula para a função desejada
+	lb t5, 0(t0)
+	sb t5, 0(s9)
+	addi t0, t0, 1
+	addi s9, s9, 1	
+	addi t4, t4, 1
+	beq t4, t6, APAGA_PULA_CIMA		#quando chegar ao final de uma linha, pula para a seguinte	
+	j APAGA_IMPRIME_CIMA
+	
+	APAGA_PULA_CIMA:
+	addi t6, t6, 24			#incrementa o numero de pixels impressos em 24 para o próximo beq ainda pular linha.
+	addi s9, s9, 0x128		
+	j APAGA_IMPRIME_CIMA
+
+NOVOVAL_CIMA:
+	li t5, 0x1300			#retira os valores que foram somados para imprimir na linha seguinte, voltando ao "canto superior esquerdo"
+	sub s9, s9, t5			#da imagem.
+	
+	li t5, -0xA00
+	add s10, s10, t5		# Subtrai o valor equivalente a 8 linhas, deixando o endereço inicial 8 pixels acima
+			
+ANDA_CIMA:
+	la t0, lamarcima	#endereço de imagem
+	lw t1, 0(t0) 		#x(linhas)
+	lw t2, 4(t0) 		#y(colunas)
+	lw t6, 0(t0)            #armazena o n de linhas da imagem para incrementar em t1 sem ser alterado
+	mul t3, t1, t2		#numero total de pixels
+	addi t0, t0, 8		#Primeiro pixel
+	li t4, 0		#contador
+	li s0, 0  		#endereço inicial de print/frame da proxima posicao do personagem
+	add s9, s10, zero	#armazena em s9 o endereço em que o personagem deve ser impresso
+	add s0, s0, s9		#passa o endereço para s0, de forma a não manipular diretamente no s9
+	addi s0, s0, 8		#soma 8 pixels no endereco inicial, que e a quantidade que o personagem anda
+	
+	
+#Já com a imagem carregada, ocorre impressao nesse loop	
+IMPRIME_CIMA:
+	beq t4, t3, INC			#quando finalizar, pula para a função desejada
+	lb t5, 0(t0)
+	sb t5, 0(s0)
+	addi t0, t0, 1
+	addi s0, s0, 1	
+	addi t4, t4, 1
+	beq t4, t6, PULA_CIMA		#quando chegar ao final de uma linha, pula para a seguinte	
+	j IMPRIME_CIMA
+	
+	PULA_CIMA:
+	add t6, t6, t1			#incrementa o numero de pixels impressos em 16 para o próximo beq ainda pular linha.
+	addi s0, s0, 0x130
+	j IMPRIME_CIMA
+
+
+
+########################################################################
+########################################################################
+
+	APAGABAIXO:
+	la t0, meiochao		#endereço de imagem
+	lw t1, 0(t0) 		#x(linhas)
+	lw t2, 4(t0) 		#y(colunas)
+	lw t6, 0(t0)            #armazena o n de linhas da imagem para incrementar em t1 sem ser alterado
+	mul t3, t1, t2		#numero total de pixels
+	addi t0, t0, 8		#Primeiro pixel
+	li t4, 0		#contador
+	addi s9, s10, 0		#guarda em s9 o endereço em que deve começar a apagar
+
+APAGA_IMPRIME_BAIXO:
+	bge t4, t3, NOVOVAL_BAIXO		#quando finalizar, pula para a função desejada
+	lb t5, 0(t0)
+	sb t5, 0(s9)
+	addi t0, t0, 1
+	addi s9, s9, 1	
+	addi t4, t4, 1
+	beq t4, t6, APAGA_PULA_BAIXO		#quando chegar ao final de uma linha, pula para a seguinte	
+	j APAGA_IMPRIME_BAIXO
+	
+	APAGA_PULA_BAIXO:
+	addi t6, t6, 24			#incrementa o numero de pixels impressos em 24 para o próximo beq ainda pular linha.
+	addi s9, s9, 0x128		
+	j APAGA_IMPRIME_BAIXO
+
+NOVOVAL_BAIXO:
+	li t5, 0x1300			#retira os valores que foram somados para imprimir na linha seguinte, voltando ao "canto superior esquerdo"
+	sub s9, s9, t5			#da imagem.
+	
+	li t5, -0xA00
+	sub s10, s10, t5		# Subtrai o valor equivalente a 8 linhas, deixando o endereço inicial 8 pixels acima
+			
+ANDA_BAIXO:
+	la t0, lamarbaixo	#endereço de imagem
+	lw t1, 0(t0) 		#x(linhas)
+	lw t2, 4(t0) 		#y(colunas)
+	lw t6, 0(t0)            #armazena o n de linhas da imagem para incrementar em t1 sem ser alterado
+	mul t3, t1, t2		#numero total de pixels
+	addi t0, t0, 8		#Primeiro pixel
+	li t4, 0		#contador
+	li s0, 0  		#endereço inicial de print/frame da proxima posicao do personagem
+	add s9, s10, zero	#armazena em s9 o endereço em que o personagem deve ser impresso
+	add s0, s0, s9		#passa o endereço para s0, de forma a não manipular diretamente no s9
+	addi s0, s0, 8		#soma 8 pixels no endereco inicial, que e a quantidade que o personagem anda
+	
+	
+#Já com a imagem carregada, ocorre impressao nesse loop	
+IMPRIME_BAIXO:
+	beq t4, t3, INC			#quando finalizar, pula para a função desejada
+	lb t5, 0(t0)
+	sb t5, 0(s0)
+	addi t0, t0, 1
+	addi s0, s0, 1	
+	addi t4, t4, 1
+	beq t4, t6, PULA_BAIXO		#quando chegar ao final de uma linha, pula para a seguinte	
+	j IMPRIME_BAIXO
+	
+	PULA_BAIXO:
+	add t6, t6, t1			#incrementa o numero de pixels impressos em 16 para o próximo beq ainda pular linha.
+	addi s0, s0, 0x130
+	j IMPRIME_BAIXO
+						
+RETORNA:ret
 .end_macro
 
 
