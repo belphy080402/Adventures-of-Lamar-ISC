@@ -5,19 +5,22 @@
 # Por favor, comente o codigo com clareza
 
 .data
+#macros
+.include "macro.s"
+
 # personagem para teste
-.include "lamar.data"
+.include "./Imagens/lamar.data"
 
 # mapa para teste
-.include "MAPA1.data"
+.include "./Imagens/MAPA1.data"
 
 # macro para o menu funcional
 .include "menu.s"
 
 .text
+Menu
 MAIN:
 
 # Ate o momento so mostra as imagens em sequencia.
 # So vou colocar a musica depois que estiver tudo
 # funcionando pra facilitar o teste.
-Menu
