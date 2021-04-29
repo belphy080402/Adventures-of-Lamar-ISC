@@ -17,10 +17,17 @@
 # macro para o menu funcional
 .include "menu.s"
 
+# chao para preencher onde o personagem estava
+.include "./Imagens/meiochao.data"
+
 .text
+
 Menu
 MAIN:
 
-# Ate o momento so mostra as imagens em sequencia.
-# So vou colocar a musica depois que estiver tudo
-# funcionando pra facilitar o teste.
+Imprimepersonagem(0xFF008C22, NEXT)
+NEXT:
+
+Andapersonagem()
+
+

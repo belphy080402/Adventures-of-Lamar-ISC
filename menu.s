@@ -210,5 +210,6 @@ IMPRIME_FASE1:
 PASSWORD:
 	#___________vazio, fazer tela de password
 
-RETORNA: ret		
+RETORNA: ret
+		
 .end_macro
