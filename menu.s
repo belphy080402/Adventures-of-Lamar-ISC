@@ -1,88 +1,37 @@
-.macro Menu
+.macro  Menu
 
 .data
 # imagem inicial do menu
-.include "menu1.data"
+.include "./Imagens/menu1.data"
 
 # imagem final do menu
-.include "menu2.data"
+.include "./Imagens/menu2.data"
 
 # botoes de start e password
-.include "menu3.data"
+.include "./Imagens/menu3.data"
 
 # imagem da seta que aparece ao lado dos botoes
-.include "seta.data"
+.include "./Imagens/seta.data"
+
+#imagem a ser MUDAR para contar contexto e historia do jogo
+.include "./Imagens/Historia.data"
+
 
 .text
+#====================MENU=================================
 # Prepara os endereços para printar o menu na tela
-MENU_I:
-	la t0, menu1
-	lw t1, 0(t0)
-	lw t2, 4(t0)
-	mul t3, t1,t2
-	addi t0, t0, 8
-	li t4, 0
-	li s0, 0xFF000000
-
-# Printa o menu de 4 em 4 pixels
-PRINTA_MENU:
-	beq t4,t3, MENU_F
-	lw t5, 0(t0)
-	sw t5, 0(s0)
-	addi t0, t0, 4
-	addi s0, s0, 4
-	addi t4, t4, 4
-	j PRINTA_MENU
-
+	Impressao(menu1, 0xFF000000, 0, MENU_F)
 
 # Prepara os enderecos para printar a segunda parte do menu
 MENU_F:
-	la t0, menu2
-	lw t1, 0(t0)
-	lw t2, 4(t0)
-	mul t3, t1,t2
-	addi t0, t0, 8
-	li t4, 0
-	li s0, 0xFF000000
-
-# Pausa de 1 segundo para mostrar o resto do titulo
-li a7, 32
-li a0, 1000
-ecall
-
-# Printa a segunda parte do menu
-PRINTA_MENUF:
-	beq t4,t3, MUSICA
-	lw t5, 0(t0)
-	sw t5, 0(s0)
-	addi t0, t0, 4
-	addi s0, s0, 4
-	addi t4, t4, 4
-	j PRINTA_MENUF
+	Impressao(menu2,0xFF000000,1000,MUSICA)
 
 MUSICA:		# Vazio ate que o menu esteja pronto
 
-# Prepara os enderecos para printar a segunda parte do menu
+# Prepara os enderecos para printar a segunda parte do menu e entra para a seta de seleção do menu
 MENU_TXT: 
-	la t0, menu3
-	lw t1, 0(t0) 		#Pega as dimensoes da imagem
-	lw t2, 4(t0)
-	mul t3, t1,t2 		#Quantidade total de pixels
-	addi t0, t0, 8
-	li t4, 0
-	li s0, 0xFF000000
-
-
-# Printa a segunda parte do menu
-PRINTA_MENU_TXT:
-	beq t4,t3, SETA 	# Pula para a seta caso tenha terminado o menu
-	lw t5, 0(t0)
-	sw t5, 0(s0)
-	addi t0, t0, 4
-	addi s0, s0, 4
-	addi t4, t4, 4
-	j PRINTA_MENU_TXT
-
+	Impressao(menu3,0xFF000000,0,SETA)
+#========================================================
 
 SETA:
 	la t0, seta
@@ -91,7 +40,7 @@ SETA:
 	mul t3, t1, t2
 	addi t0, t0, 8
 	li t4, 0
-	li t6, 19			# Largura x da seta, vai ser usada pra pular linhas.
+	li t6, 19		# Largura x da seta, vai ser usada pra pular linhas.
 	li s1, 0xFF00BF98 		# Endereco onde comeca a imprimir a seta.
 
 
@@ -128,19 +77,22 @@ TECLADO:
 INC:	addi s0, s0, 1		# Incrementa o contador
 	jal RECEBE_TECLA
 	j INC			# Retorna ao contador
-
+	
+#=================================TECLADO===============================
 RECEBE_TECLA: 
 	li t1,0xFF200000		# carrega o KDMMIO
 	lw t0,0(t1)			# Le bit de Controle Teclado
 	andi t0,t0,0x0001		# mascara o bit menos significativo
-   	beq t0,zero,RETORNA   	   	# Se não há tecla pressionada então vai para FIM
-  	lw t2,4(t1)  			# le o valor da tecla tecla
+   	beq t0,zero,RETORNA   	   	# Se não há tecla pressionada então vai para Retorno(funça {RETORNA: ret} deve estar no final da pagina do arquivo)
+   	lw t2,4(t1)  			# le o valor da tecla
+   	
 	li t5, 115			# ascii de "w" para verificar se foi pressionado
 	li t6, 119			# ascii de "s" para verificar se foi pressionado
-	beq t2, t6, SETA_CIMA
-	beq t2, t5, SETA_BAIXO
-
-#----------------------------------------------------------------------------------------------------------------#		
+	li t0, 102			# ascii de "f" para verificar se foi pressionado
+	beq t2, t6, SETA_CIMA		#SETA vai pra cima	
+	beq t2, t5, SETA_BAIXO		#SETA vai pra baixo
+	beq t2, t0, SELEÇAO_MENU	#Entra no lugar desejado	
+#=========================================================================		
 SETA_CIMA:
 	li a1, 0		# carrega 0 em a1 para indicar que a seta esta em "start"
 	
@@ -241,8 +193,22 @@ PULA_LINHA_APAGACIMA:
 	addi t6, t6, 19
 	addi s1,s1, 0x12D
 	j IMPRIME_SETABAIXO
+#==========================SELEÇÃO Start/Password ======================================
+#a1 = 0 seta esta em start
+#a1 = 1 seta esta em password
+ 
+SELEÇAO_MENU:
+	li t0, 1 
+	beq a1, zero, START
+	beq a1, t0, PASSWORD
 
+START:
+	Impressao(Historia, 0xFF000000, 0, IMPRIME_FASE1)		#imagem contando historia do jogo
+IMPRIME_FASE1:
+	Impressao(MAPA1, 0xFF000000, 8000, MAIN)		#print da primeira fase com delay de 8seg para se ler a historia
+		#MAIN seria o inicio da gameplay funçao localizada em ADVLAMAR.s
+PASSWORD:
+	#___________vazio, fazer tela de password
 
-
-RETORNA: ret
+RETORNA: ret		
 .end_macro
