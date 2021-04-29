@@ -26,6 +26,7 @@ Menu
 MAIN:
 
 Imprimepersonagem(0xFF008C22, NEXT)
+
 NEXT:
 
 Andapersonagem()
